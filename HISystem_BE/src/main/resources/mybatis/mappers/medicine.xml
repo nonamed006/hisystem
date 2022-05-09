@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="proof">
+
+
+	<select id="patientTotalCount" parameterType="string"
+		resultType="integer">
+		<![CDATA[
+	select m.code as code,
+		   m.medicine_nm as medicine_nm,
+		   m.company as company,
+	       m.main_ingredient as main_ingredient,
+	       m.additive as additive,
+	       m.origin as origin,
+	       d.no as diag_no,
+	       d.reservation_no1 as reservation_no ,
+	       d.date as diag_date,
+	       p.name as patient_name,
+	       u.name as doctor_name
+	        from medicine m ,diagnosis_has_medicine dhm,diagnosis d, reservation r,patient p,user u
+	where m.code= dhm.medicine_code
+	  and dhm.diagnosis_no = d.no
+	    and r.no = d.reservation_no1
+	    and r.patient_no = p.no
+	    and r.user_doctor_no = u.no
+	    and d.no = "11";
+		]]>
+	</select>
+
+	
+
+</mapper>
+	

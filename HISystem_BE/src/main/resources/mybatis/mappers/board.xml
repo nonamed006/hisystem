@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="board">
+	
+	<insert id="insert" parameterType ="board">
+	<![CDATA[
+		insert into board values(null, #{title }, #{contents } ,now(),'0',#{user_no})
+	]]>
+	</insert>
+	 
+	 <select id="totalCount" parameterType="string" resultType="integer">
+		<choose>
+			<when test="_parameter == null or _parameter == ''">
+				<![CDATA[
+				select count(*) from board
+				]]>				
+			</when>
+			<otherwise>
+				<![CDATA[
+				select count(*) 
+				  from board
+				 where (title like '%${_parameter }%' or contents like '%${_parameter  }%') 
+				]]>				
+			</otherwise>
+		</choose>	
+	</select>
+	 
+	<select id="findAllByPageAndKeyword" parameterType="map" resultType="board">
+		<choose>
+			<when test="keyword == null or keyword == ''">
+				<![CDATA[
+				SELECT c.*
+				FROM   (
+				select @rownum := @rownum +1                 as row_no, 
+					   b.no,
+				       b.title,
+                       b.contents,
+				       b.reg_date,
+				       b.hit,
+				       b.user_no,
+                       u.name as user_name
+				  from board b, user u,  (SELECT @rownum:=0 ) r
+				 where b.user_no = u.no
+                 order by b.reg_date desc) c
+  			     limit #{startIndex },#{size };			
+				]]>
+			</when>
+			<otherwise>
+				<![CDATA[
+				SELECT c.*
+				FROM   (
+				select @rownum := @rownum +1                 as row_no, 
+					   b.no,
+				       b.title,
+                       b.contents,
+				       b.reg_date,
+				       b.hit,
+				       b.user_no,
+                       u.name as user_name
+				  from board b, user u,  (SELECT @rownum:=0 ) r
+				 where b.user_no = u.no
+                 and (b.title like '%${keyword}%' or b.contents like '%${keyword}%')
+                 order by b.reg_date desc) c
+  			     limit #{startIndex },#{size };			
+				]]>			
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findByNo" parameterType="long" resultType="board">
+		<![CDATA[
+		  select	b.no,
+					b.title,
+					b.contents,
+					b.reg_date,
+					b.user_no ,
+			        u.name as user_name        
+		       from board b, user u
+		      where b.no = #{no }
+		        and b.user_no = u.no
+		]]>		
+	</select>
+	
+	<update id="update" parameterType="board">
+		<![CDATA[
+		update board 
+		   set title=#{title },
+		       contents=#{contents }
+		 where no=#{no }
+		   and user_no=#{user_no }		
+		]]>	
+	</update>
+	
+	<delete id="delete" parameterType="map" > 
+		<![CDATA[
+		delete
+		  from board 
+		 where no = #{no }
+		   
+		]]>	
+	</delete>
+	
+		<update id="updateHit" parameterType="board">
+		<![CDATA[
+		update board 
+		   set hit = #{hit}
+		 where no=#{no }
+		   		
+		]]>	
+	</update>
+	
+	
+</mapper>
+	

@@ -1,0 +1,126 @@
+
+
+  .App {
+    font-family: sans-serif;
+    text-align: center;
+  }
+
+    /* kanban board style  */
+  .react-kanban-column {
+    display: inline-block;
+    vertical-align: top;
+    width: 225px;
+    padding: 10px;
+    border-radius: 10px;
+    margin-right: 20px;
+    background: #ffa8a8;
+    /* color: #da152f;   */
+  }
+   
+    /* kanban board header style */
+   .react-kanban-column-header{
+			font-size: 1.5em;
+			color:#000000;
+			font-weight: 600;
+    }
+
+    /* card style */
+  .react-kanban-card {
+		width: 200px;
+    padding: 10px 10px 10px 15px;
+    background: #fff5f5;
+    color: #333333;
+    border-radius: 10px;
+    margin: 5px 0px 5px 0px;
+    cursor: move;
+		font-weight: 600;
+  }
+  
+  /* card header style */
+  .react-kanban-card__title {
+    font-size: 20px;
+		font-weight: 600;
+		padding: 0px 0px 5px 0px;
+    /* text-decoration: underline; */
+    /* font-style: italic; */
+  }
+
+  /* 드래그시 card style */
+  .react-kanban-card--dragging {
+    /* transform: rotate(90deg); */
+    background: #fff5f5;
+    /* color: purple; */
+  }
+
+  /* +버튼 */
+  .react-kanban-card-adder-button{
+    margin: 0px 0px 0px 0px;
+    padding: 3px 12px 6px 12px;
+    background-color: #f06595;
+    font-family: "Noto Sans KR", sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    width: auto;
+    border: none;
+    border-radius: 10px;
+  }
+
+  .react-kanban-card-adder-form__title{
+		width: 80px;
+		height: 30px;
+		border-radius: 5px;
+    background-color: #fff5f5;
+		padding: 5px;
+  }
+
+	.react-kanban-card-adder-form__description{
+		width: 120px;
+		height: 30px;
+		border-radius: 5px;
+    background-color: #fff5f5;
+		margin: 0px 0px 0px 5px;
+		padding: 5px;
+	}
+
+	.react-kanban-card-adder-form__button{
+		width: 120px;
+		height: 30px;
+		border-radius: 3px;
+    background-color: #f06595;
+		margin: 10px 10px 10px 10px;
+		padding: 0px;
+		font-weight: 600;
+	}
+
+	/* 안에 보드 각각 */
+ .react-kanban-board{
+		padding: 0px;
+ }
+ 
+ /* 카드 설명 부분 */
+ .react-kanban-card__description{
+		padding: 0px;
+ }
+ /* add 폼 */
+ .react-kanban-card-adder-form{
+		padding: 0px;
+ }
+
+ /* 칸반 이름 수정 버튼 */
+ .react-kanban-column-header__button{
+    width: 100px;
+    height: 40px;
+    border-radius: 3px;
+    background-color: #f06595;
+    margin: 0px 0px 0px 10px;
+    padding: 0px;
+    font-weight: 500;
+ }
+ .react-kanban-column-adder-button{ 
+  padding: 120px 10px 10px 10px;
+}
+ .react-kanban-card-skeleton{
+ }

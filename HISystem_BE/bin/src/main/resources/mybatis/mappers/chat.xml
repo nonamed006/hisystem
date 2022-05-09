@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="chat">
+	
+	<insert id="insert" parameterType ="board">
+	<![CDATA[
+		insert into board values(null, #{title }, #{contents } ,now(),'',#{user_no})
+	]]>
+	</insert>
+	 
+	<select id="findAll" parameterType ="int" resultType="chatRoomDto">
+		<![CDATA[
+
+		SELECT a.user_no        as userNo,
+			   a.chatroom_no    as roomNo,
+			   b.name           as roomName,
+			   count(c.read_yn) as count,
+			   date_format(max(reg_date), '%H:%i') as time, 
+			   d.msg            as msg
+		from   chatinfo a
+		INNER  JOIN chatroom b ON a.chatroom_no= b.roomId
+		INNER  JOIN chatmsg  c ON a.chatroom_no= c.chatroom_no
+		INNER  JOIN (SELECT DISTINCT(msg), chatroom_no
+					 FROM   chatmsg 
+					 WHERE  reg_date IN (SELECT max(reg_date)
+										 FROM   chatmsg 
+										 WHERE  read_yn = 'N' 
+										 AND    receive_user_no=#{no}
+										 #AND   send_user_no != 6
+										 GROUP  BY chatroom_no)
+										 ORDER  BY chatroom_no) d ON a.chatroom_no= d.chatroom_no
+		WHERE  a.user_no       = #{no}
+		AND    c.read_yn       = 'N'
+		AND    receive_user_no = #{no} 
+		#AND    send_user_no   != 6
+		GROUP  BY a.user_no, a.chatroom_no, b.name
+		ORDER  BY max(reg_date) desc;;
+
+		]]>				
+	</select>
+<!-- select a.user_no     as userNo,
+			a.chatroom_no as roomNo,
+			b.name        as roomName
+	 from   chatinfo a
+	 inner  join chatroom b on a.chatroom_no = b.roomId
+	 where  a.user_no = #{no} -->
+	 <select id="findAllMessage" parameterType ="int" resultType="chatMessageDto">
+		<![CDATA[
+		select *
+		from   chatmsg
+		where  chatroom_no= #{no}
+		]]>				
+	</select>
+
+	<insert id="addMessage" parameterType ="map">
+	<![CDATA[
+		insert into chatmsg
+		select null, #{msg}, now(), #{send_no}, 'N', #{room_no}, user_no
+		from   chatinfo 
+		where  chatroom_no= #{room_no}
+	]]>
+	</insert>	
+	
+	<insert id="createChatRoom" parameterType="string">
+	<![CDATA[
+		insert into chatroom values(null, #{name})
+	]]>
+	</insert>	
+	
+	<insert id="createChatInfo" parameterType="map">
+	<![CDATA[
+		insert into chatinfo values(#{userNo}, #{charRoomNo})
+	]]>
+	</insert>
+	
+ 	<select id="getMaxRoomId" resultType="int">
+		<![CDATA[
+		SELECT max(roomId) FROM hisystem.chatroom;
+		]]>				
+	</select>
+	
+ 	<select id="chatting" parameterType="map" resultType="int">
+		<![CDATA[
+		select chatroom_no as roomNo from (select chatroom_no from chatinfo where user_no = #{i}
+		union all
+		select chatroom_no from chatinfo where user_no = #{you}) a 
+		group by chatroom_no
+		having count(*) = 2;
+		]]>				
+	</select>
+		
+</mapper>
+	

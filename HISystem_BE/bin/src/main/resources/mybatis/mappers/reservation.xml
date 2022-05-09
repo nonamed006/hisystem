@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="reservation">
+	<!-- 접수 -->
+	<!-- 접수 현황 조회 / 검색 -->
+	<select id = "findByRevdate" parameterType ="map" resultType ="reservationDto">
+	<![CDATA[
+	select * from (
+	SELECT @rownum := @rownum +1  AS row_no, a.*
+	FROM   (
+	select  
+			res.no, 
+				   res.reg_date, 
+				   rev_date, 
+				   res.status, 
+				   res.user_staff_no, 
+				   res.patient_no,
+				   res.remark, 
+				   res.rev_yn, 
+				   res.user_doctor_no,
+				   pat.name,
+				   if(pat.gender='M', '남자', '여자') as gender,
+				   concat(left(pat.ssn, 8), '******') as ssn,
+				   pat.phone, 
+				   pat.addr, 
+				   pat.insurance_yn,
+				   u.name as doctor_name,
+                   u.dia_status
+			from   reservation as res
+			inner  join patient as pat on res.patient_no = pat.no
+			inner join user as u on res.user_doctor_no= u.no
+			where  date_format(rev_date, '%Y-%m-%d') = date_format(now(), '%Y-%m-%d')
+			and    pat.name like #{name}
+            and    (res.status = #{status} or res.status = #{status2})
+            ) a, (SELECT @rownum:=0 ) b
+            order  by rev_date asc
+            ) c limit #{nowPage}, 5 
+	]]> 
+	</select>
+	
+	<!-- 페이징 데이터 총 개수 구하기 -->
+	<select id = "getCount" parameterType ="map" resultType ="int">
+	<![CDATA[
+			select  count(*)
+			from   reservation as res
+			inner  join patient as pat on res.patient_no = pat.no
+			where  date_format(rev_date, '%Y-%m-%d') = date_format(now(), '%Y-%m-%d')
+            and    name like #{name}
+			and    (status = #{status} OR status = #{status2}) 
+	]]>
+	</select>
+	
+	<!-- 접수 등록 -->
+	<insert id="insertReceipt" parameterType="reservation">
+	<![CDATA[
+		insert into reservation values(null, now(), now(), '1', #{user_staff_no}, #{patient_no}, #{remark}, 'N', #{user_doctor_no})
+	]]>
+	</insert>
+	
+	<!-- 접수 삭제 -->
+	<delete id="deleteByNo" parameterType="int">
+	<![CDATA[
+		DELETE 
+		FROM   reservation 
+		WHERE  no = #{no}
+	]]>
+	</delete>
+	
+	<!-- 환자 진료대기에서 진료중으로 상태 업데이트 -->
+	<update id="update" parameterType="int">
+		<![CDATA[
+			UPDATE reservation
+			SET    status = '2'
+			WHERE  no = #{no}
+		]]>
+	</update>
+	
+	<!-- 환자 예약방문에서 진료대기로 상태 업데이트 -->
+	<update id="update2" parameterType="int">
+		<![CDATA[
+			UPDATE reservation
+			SET    status = '1'
+			WHERE  no = #{no}
+		]]>
+	</update>
+	
+	<!-- 예약 -->
+	<!-- 예약 현황 조회 -->
+	<select id = "findReservation" parameterType ="map" resultType ="reservationDto">
+	<![CDATA[
+	select * from (
+	SELECT @rownum := @rownum +1  AS row_no, a.*
+	FROM   (
+	select  
+                   res.no, 
+				   res.reg_date, 
+				   date_format(rev_date, '%Y-%m-%d %H:%i') as rev_date, 
+				   res.status, 
+				   res.user_staff_no, 
+				   res.patient_no,
+				   res.remark, 
+				   res.rev_yn, 
+				   res.user_doctor_no,
+				   pat.name,
+				   if(pat.gender='M', '남자', '여자') as gender,
+				   concat(left(pat.ssn, 8), '******') as ssn,
+				   pat.phone, 
+				   pat.addr, 
+				   pat.insurance_yn
+			from   reservation as res
+			inner  join patient as pat on res.patient_no = pat.no
+			where  date_format(rev_date, '%Y-%m-%d') = if(date_format(#{rev_date}, '%Y-%m-%d')=date_format('9999-12-31', '%Y-%m-%d'), date_format(now(), '%Y-%m-%d'), date_format(#{rev_date}, '%Y-%m-%d'))
+			and    pat.name like #{name}
+            and    rev_yn = 'Y'
+			
+            ) a, (SELECT @rownum:=0 ) b
+            order  by rev_date asc
+            ) c limit #{nowPage}, 5 
+	]]> 
+	</select>
+	
+	<!-- 페이징 데이터 총 개수 구하기 -->
+	<select id = "getCountRes" parameterType ="String" resultType ="int">
+	<![CDATA[
+			select  count(*)
+			from   reservation as res
+			inner  join patient as pat on res.patient_no = pat.no
+			where  date_format(rev_date, '%Y-%m-%d') = date_format(now(), '%Y-%m-%d')
+            and    name like #{name}
+            and    rev_yn = 'Y'
+			and    (status = '1' OR status = '4') 
+	]]>
+	</select>
+	
+	<!-- 예약 등록 -->
+	<insert id="insertReservation" parameterType="reservation">
+	<![CDATA[
+		insert into reservation values(null, now(), #{rev_date}, '4', #{user_staff_no}, #{patient_no}, #{remark}, 'Y', #{user_doctor_no})
+	]]>
+	</insert>
+	
+	<!-- 환자 진료중 -> 완료 업데이트 -->
+	<update id="update3" parameterType="int">
+		<![CDATA[
+			UPDATE reservation
+			SET    status = '3'
+			WHERE  no = #{no}
+		]]>
+	</update>
+	
+</mapper>
+	

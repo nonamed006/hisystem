@@ -1,0 +1,13 @@
+.addr-api-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    /* padding: 1.0rem; */
+    padding: 0 0rem 1.5rem 2rem;
+    border-bottom: 0 solid #e9ecef;
+    border-top-left-radius: 0.4375rem;
+    border-top-right-radius: 0.4375rem; }
+    .addr-api-modal-header .close {
+      padding: 1.25rem;
+      margin: 0rem -1rem -1rem 24rem; }
+        

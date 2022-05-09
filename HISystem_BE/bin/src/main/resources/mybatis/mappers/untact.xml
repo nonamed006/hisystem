@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="untact">
+
+	<select id="findAll" resultType="untact">
+		<![CDATA[
+select @rownum := @rownum +1 as row_no, a.* from (select no, name, concat(left(ssn, 8), '******') as ssn, phone, if(gender='M', '남자', '여자') as gender, insurance_yn, addr, doctor_no, remark, reg_date, status
+from untact where status = '1') a, (SELECT @rownum:=0 ) b;		]]>				
+	</select>
+	
+		<select id="find" parameterType="int" resultType="untact">
+		<![CDATA[
+			select * from untact where no = #{no}
+		]]>				
+	</select>
+	
+	<select id="search" parameterType="int" resultType="int">
+		<![CDATA[
+		select ifnull(max(no), -1) from patient where ssn = (select ssn from untact where no = #{no});
+		]]>				
+	</select>
+	
+	<insert id="add" parameterType="untact">
+	<![CDATA[
+		insert into untact values(null, #{name}, #{ssn}, #{phone}, #{gender}, #{insurance_yn}, #{addr}, #{doctor_no}, #{remark}, now(), '1')
+	]]>
+	</insert>
+	
+	<update id="ok1" parameterType="int">
+	<![CDATA[
+		UPDATE untact
+		SET    status = '3'
+		WHERE  no = #{no}
+	]]>
+</update>
+</mapper>

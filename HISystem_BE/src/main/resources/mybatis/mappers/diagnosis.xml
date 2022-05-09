@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="diagnosis">
+
+	<select id = "findByNo" parameterType="int" resultType ="diagnosisDto">
+	<![CDATA[
+		SELECT a.no                  as dia_no, 
+			   a.remark              as dia_remark, 
+		       a.date                as dia_date, 
+		       a.reservation_no1     as dia_res_no, 
+		       a.user_no             as dia_user_no,  # 진단 정보 end
+		       b.diseases_code     as dis_code,
+		       c.diseases_kr       as dis_name, # 질병 정보 end
+		       d.medicine_code     as med_code,
+		       e.medicine_nm       as med_name, # 약 정보 end
+		       f.prescription_code as pre_code,
+		       g.desc              as pre_desc,
+		       g.desc_detail       as pre_detail, # 처방 정보 end
+		       h.patient_no        as pat_no,
+		       i.name              as pat_name # 환자 정보 end
+		FROM diagnosis a
+		inner join diagnosis_has_diseases b     on a.no = b.diagnosis_no
+		inner join diseases c                   on b.diseases_code = c.code # 질병 무조건 들어감
+		left  join diagnosis_has_medicine d     on a.no = d.diagnosis_no
+		left  join medicine e                   on d.medicine_code = e.code # 약 없을 수도 있음
+		inner join diagnosis_has_prescription f on a.no = f.diagnosis_no
+		inner join prescription g               on f.prescription_code = g.code # 처방 무조건 들어감
+		inner join reservation h                on a.reservation_no1 = h.no
+		inner join patient i                    on h.patient_no = i.no
+		where i.no = #{ no }
+	]]>
+	</select>
+	
+	<insert id="insertzzz" parameterType="map">
+		
+		#insert into diagnosis values (null, #{remark}, now(), #{reservationNo}, #{userNo})
+		
+		#insert into diagnosis_has_diseases values (#{diagnosisNo}, #{diseasesCode})
+		#insert into diagnosis_has_medicine values (#{diagnosisNo}, #{medicineCode})
+		#insert into diagnosis_has_prescription values (#{diagnosisNo}, #{prescriptionCode})	
+	</insert> 
+	
+	<!-- 질병 약 처치 정보 가져오기 -->
+	<select id = "findDiaInfo" resultType ="diaInfoDto">
+		<![CDATA[
+		select trim(a.code)            AS dis_code,  
+			   trim(a.diseases_kr)     AS dis_kr_name, 
+		       trim(a.diseases_en)     AS dis_en_name # 질병
+		from diseases a;
+		]]>
+	</select>
+	<select id = "findDiaInfo2" resultType ="diaInfoDto">
+		<![CDATA[
+		select trim(b.code)            AS med_code, 
+		       trim(b.medicine_nm)     AS med_name, 
+		       trim(b.company)         AS med_company, 
+		       trim(b.main_ingredient) AS med_ingredient, 
+		       trim(b.additive)        AS med_additive, 
+		       trim(b.origin)          AS med_origin # 약
+		from medicine b
+		]]>
+	</select>
+	<select id = "findDiaInfo3" resultType ="diaInfoDto">
+		<![CDATA[
+		select c.code            AS pre_code, 
+		       c.reg_date        AS pre_date, 
+		       c.desc            AS pre_desc, 
+		       c.desc_detail     AS pre_desc_detail, 
+		       c.price           AS pre_price # 처방
+		from prescription c
+		]]>
+	</select>
+	
+	
+	
+	
+	
+	
+	<insert id="insert" parameterType ="diagnosis">
+	<![CDATA[
+		insert into diagnosis values(null, #{remark }, now(), #{reservation_no}, #{user_no})
+	]]>
+	</insert>
+	
+	<select id = "getPk" resultType ="int">
+		<![CDATA[
+		select ifnull(max(no), 1) from diagnosis
+		]]>
+	</select>
+	
+	<insert id="insertDiseases" parameterType ="diagnosis">
+	<![CDATA[
+		insert into diagnosis_has_diseases values(#{pk}, #{diseases})
+	]]>
+	</insert>
+	
+	<insert id="insertMedicine" parameterType ="diagnosis">
+	<![CDATA[
+		insert into diagnosis_has_medicine values(#{pk}, #{medicine})
+	]]>
+	</insert>
+	
+	<insert id="insertPrescription" parameterType ="diagnosis">
+	<![CDATA[
+		insert into diagnosis_has_prescription values(#{pk}, #{prescription})
+	]]>
+	</insert>
+	
+</mapper>

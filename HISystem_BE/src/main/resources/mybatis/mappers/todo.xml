@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="todo">
+<!-- 투두리스트 조회 -->
+	<select id="findByNo" parameterType="int" resultType="todo">
+		<![CDATA[
+		select no, contents, reg_date, date_format(rev_date, '%Y-%m-%d %H:%i') as rev_date, fin_yn, user_no
+		from todolist
+		where user_no = #{user_no}
+		and date_format(rev_date, '%Y-%m-%d') = date_format(now(), '%Y-%m-%d')
+		order by rev_date asc
+		]]>				
+	</select>
+	
+	<!-- 스케줄러 관련 -->
+	<select id="findSchedule" resultType="todo">
+		<![CDATA[
+		select * from todolist
+		where date_format(rev_date, '%Y-%m-%d %H:%i') = date_format(DATE_ADD(NOW(), INTERVAL 1 MINUTE), '%Y-%m-%d %H:%i')
+		]]>				
+	</select>
+	
+	<!-- 할일 등록 -->
+	<insert id="insertTodo" parameterType="todo">
+	<![CDATA[
+		insert into todolist values(null, #{contents}, now(), #{rev_date}, 'N', #{user_no})
+	]]>
+	</insert>
+	
+	<!-- 할일 삭제 -->
+	<delete id="deleteByNo" parameterType="int">
+	<![CDATA[
+		DELETE 
+		FROM   todolist 
+		WHERE  no = #{no}
+	]]>
+	</delete>
+	
+	<!-- 완료 업데이트 -->
+	<update id="update" parameterType="int">
+		<![CDATA[
+			UPDATE todolist
+			SET    fin_yn = if(fin_yn='Y', 'N', 'Y')
+			WHERE  no = #{no}
+		]]>
+	</update>
+	
+</mapper>

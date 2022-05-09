@@ -1,0 +1,136 @@
+# active spring boot profile
+spring:
+   profiles:
+      active: dev
+
+---
+
+# common - spring configuration
+spring:
+
+   # devtools - live reload
+   devtools:
+      livereload:
+         enabled: true
+
+   # mvc
+   mvc:
+      view:
+         prefix: /WEB-INF/views/
+         suffix: .jsp
+         
+   jpa:
+      hibernate:
+         ddl-auto: update # 
+         naming:
+            physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+      show-sql: true  
+    
+   # message resource(Internationalization)
+   messages:
+      always-use-message-format: true
+      basename: messages/messages_ko
+      encoding: utf-8
+
+   # multipart
+   servlet:
+      multipart:
+         enabled: true
+         max-file-size: 50MB
+         max-request-size: 50MB
+
+   # aop(@EnableAspectJAutoProxy)
+   aop:
+      auto: true
+      proxy-target-class: true 
+
+  
+
+---
+
+# dev profile - spring boot configuration
+
+spring:
+   config:
+      activate:
+         on-profile: dev
+      
+   # datasource
+   datasource:
+      username: hisystem
+      password: hisystem
+      driver-class-name: org.mariadb.jdbc.Driver
+      url: jdbc:mysql://34.64.239.173/hisystem?characterEncoding=utf8
+      hikari:
+         minimum-idle: 10
+         maximum-pool-size: 20
+  
+---
+
+# production profile - spring boot configuration
+spring:
+   config:
+      activate:
+         on-profile: production
+
+   # datasource
+   datasource:
+      username: webdb
+      password: blahblha#!@0909#@!
+      driver-class-name: org.mariadb.jdbc.Driver
+      url: jdbc:mysql://227.8.9.10:3306/webdb?characterEncoding=utf8
+      hikari:
+         minimum-idle: 100
+         maximum-pool-size: 200
+
+---
+
+# server
+server:
+   port: 8081
+   servlet:
+     context-path: /
+     encoding:
+        charset: utf-8
+        enabled: true
+        force: false
+        force-request: false
+        force-response: false
+
+---
+
+#mybatis
+mybatis:
+  config-location: classpath:mybatis/configuration.xml
+
+
+#---
+
+# logging
+#logging:
+#   config: classpath:logback.xml 
+
+---
+
+spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: lhyjej@gmail.com
+    password: rlsgroucguxfemmh
+    properties:
+      mail:
+        smtp:
+          starttls:
+            enable: true
+            #required: true
+          auth: true
+    
+    
+#spring.mail.host=smtp.gmail.com
+#spring.mail.port=587
+#spring.mail.username=username
+#spring.mail.password=password
+#spring.mail.properties.mail.smtp.starttls.enable=true
+#spring.mail.properties.mail.smtp.starttls.required=true
+#spring.mail.properties.mail.smtp.auth=true

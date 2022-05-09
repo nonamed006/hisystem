@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="proof">
+
+
+	<select id="patientTotalCount" parameterType="string" resultType="integer">
+		<choose>
+			<when test="_parameter == null or _parameter == ''">
+				<![CDATA[
+SELECT count(*)
+		FROM   (
+		SELECT @rownum := @rownum +1                 AS row_no, 
+		       a.no                                  AS no,
+		       a.name                                AS name,
+		       if(a.gender='M', '남자', '여자')         AS gender,
+		       concat(left(a.ssn, 8), '******')      AS ssn,
+		       a.phone                               AS phone,
+		       a.addr                                AS addr,
+		       a.reg_date                            AS reg_date,
+		       date_format(a.visit_date, '%Y-%m-%d') AS visit_date,
+		       if(a.insurance_yn='Y', '가입', '미가입') AS insurance_yn,
+		       a.memo                                AS meno
+		FROM   hisystem.patient a, (SELECT @rownum:=0 ) b 
+        order by a.name  ) c
+								
+				]]>				
+			</when>
+			<otherwise>
+				<![CDATA[
+SELECT count(*)
+		FROM   (
+		SELECT @rownum := @rownum +1                 AS row_no, 
+		       a.no                                  AS no,
+		       a.name                                AS name,
+		       if(a.gender='M', '남자', '여자')         AS gender,
+		       concat(left(a.ssn, 8), '******')      AS ssn,
+		       a.phone                               AS phone,
+		       a.addr                                AS addr,
+		       a.reg_date                            AS reg_date,
+		       date_format(a.visit_date, '%Y-%m-%d') AS visit_date,
+		       if(a.insurance_yn='Y', '가입', '미가입') AS insurance_yn,
+		       a.memo                                AS meno
+		FROM   hisystem.patient a, (SELECT @rownum:=0 ) b 
+        where a.name like '%${keyword}%'
+        order by a.name  ) c;
+				]]>				
+			</otherwise>
+		</choose>	
+	</select>
+
+	<select id="proofTotalCount" parameterType="integer" resultType="integer">
+				<![CDATA[
+				SELECT count(*)
+				FROM   (
+				select @rownum := @rownum +1                 as row_no,
+					   d.no as diag_no,
+					   d.remark as remark, 
+					   d.date diag_date, 
+					   doctor.user_doctor_no as doctor_no,
+					   r.user_staff_no as staff_no, 
+					   r.patient_no as patient_no , 
+					   doctor.user_doctor_name as doctor_name,
+					   p.name as patient_name, 
+					   staff.user_staff_name as staff_name, 
+					   diseases_name.dis_kr as diseases_kr, 
+					   diseases_name.dis_en as diseases_en
+				  from diagnosis d, reservation r, user u, patient p, receipt rc,
+					  (select reservation.no as reservation_no, user.name as user_staff_name from reservation,user where reservation.user_staff_no = user.no) as staff,
+					  (select reservation.no as reservation_no, user.no as user_doctor_no ,user.name as user_doctor_name from reservation,user where reservation.user_doctor_no = user.no ) as doctor,
+					  (select dg.no, ds.diseases_kr as dis_kr , ds.diseases_en as dis_en from diagnosis dg, diseases ds,diagnosis_has_diseases dhd where dg.no = dhd.diagnosis_no    and ds.code = dhd.diseases_code) as diseases_name,
+					  (SELECT @rownum:=0 ) r
+				  where d.reservation_no1 = r.no 
+					   and d.user_no = u.no
+					   and r.patient_no = p.no
+					   and p.no = rc.patient_no
+					   and d.no = rc.diagnosis_no
+					   and staff.reservation_no = d.reservation_no1
+					   and doctor.reservation_no = d.reservation_no1
+					   and diseases_name.no = d.no
+					   and r.status = '3'
+					   and rc.status = '2'
+					   and r.patient_no = #{no}          
+                       ORDER by diag_date desc
+						) c ;	
+				]]>				
+	</select>
+	
+	
+	<select id="findProof" parameterType= "map" resultType="proof">
+		<![CDATA[
+		SELECT c.*
+				FROM   (
+				select @rownum := @rownum +1                 as row_no,
+					   d.no as diag_no,
+					   d.remark as remark, 
+					   d.date diag_date, 
+					   doctor.user_doctor_no as doctor_no,
+					   r.user_staff_no as staff_no, 
+					   r.patient_no as patient_no , 
+					   doctor.user_doctor_name as doctor_name,
+					   p.name as patient_name, 
+					   staff.user_staff_name as staff_name, 
+					   diseases_name.dis_kr as diseases_kr, 
+					   diseases_name.dis_en as diseases_en
+				  from diagnosis d, reservation r, user u, patient p,receipt rc,
+					  (select reservation.no as reservation_no, user.name as user_staff_name from reservation,user where reservation.user_staff_no = user.no) as staff,
+					  (select reservation.no as reservation_no, user.no as user_doctor_no ,user.name as user_doctor_name from reservation,user where reservation.user_doctor_no = user.no ) as doctor,
+					  (select dg.no, ds.diseases_kr as dis_kr , ds.diseases_en as dis_en from diagnosis dg, diseases ds,diagnosis_has_diseases dhd where dg.no = dhd.diagnosis_no    and ds.code = dhd.diseases_code) as diseases_name,
+					  (SELECT @rownum:=0 ) r
+				  where d.reservation_no1 = r.no 
+					   and d.user_no = u.no
+					   and r.patient_no = p.no
+					   and p.no = rc.patient_no
+					   and d.no = rc.diagnosis_no
+					   and staff.reservation_no = d.reservation_no1
+					   and doctor.reservation_no = d.reservation_no1
+					   and diseases_name.no = d.no
+					   and r.status = '3'
+   					   and rc.status = '2'
+					   and r.patient_no = #{patient_no}                 
+                       ORDER by diag_date desc 	
+						limit #{startIndex },#{size }		
+						) c 	
+						
+		]]>
+	</select>
+	
+	<select id="findAllPatientByPageAndKeyword" parameterType="map" resultType="Patient">
+		<choose>
+			<when test="keyword == null or keyword == ''">
+				<![CDATA[
+SELECT c.*
+		FROM   (
+		SELECT @rownum := @rownum +1                 AS row_no, 
+		       a.no                                  AS no,
+		       a.name                                AS name,
+		       if(a.gender='M', '남자', '여자')         AS gender,
+		       concat(left(a.ssn, 8), '******')      AS ssn,
+		       a.phone                               AS phone,
+		       a.addr                                AS addr,
+		       a.reg_date                            AS reg_date,
+		       date_format(a.visit_date, '%Y-%m-%d') AS visit_date,
+		       if(a.insurance_yn='Y', '가입', '미가입') AS insurance_yn,
+		       a.memo                                AS meno
+		FROM   hisystem.patient a, (SELECT @rownum:=0 ) b 
+        order by a.name  ) c
+  			     limit #{startIndex},#{size};						
+				]]>
+			</when>
+			<otherwise>
+				<![CDATA[
+			SELECT c.*
+		FROM   (
+		SELECT @rownum := @rownum +1                 AS row_no, 
+		       a.no                                  AS no,
+		       a.name                                AS name,
+		       if(a.gender='M', '남자', '여자')         AS gender,
+		       concat(left(a.ssn, 8), '******')      AS ssn,
+		       a.phone                               AS phone,
+		       a.addr                                AS addr,
+		       a.reg_date                            AS reg_date,
+		       date_format(a.visit_date, '%Y-%m-%d') AS visit_date,
+		       if(a.insurance_yn='Y', '가입', '미가입') AS insurance_yn,
+		       a.memo                                AS meno
+		FROM   hisystem.patient a, (SELECT @rownum:=0 ) b 
+        where(a.name like '%${keyword}%' )
+        order by a.name  ) c
+  			     limit #{startIndex},#{size};					
+				]]>			
+			</otherwise>
+		</choose>
+	</select>
+
+<select id="findMedicine" parameterType="integer"
+		resultType="medicine">
+		<![CDATA[
+	select m.code as code,
+		   m.medicine_nm as medicine_nm,
+		   m.company as company,
+	       m.main_ingredient as main_ingredient,
+	       m.additive as additive,
+	       m.origin as origin,
+	       d.no as diag_no,
+	       d.reservation_no1 as reservation_no ,
+	       d.date as diag_date,
+	       p.name as patient_name,
+	       u.name as doctor_name
+	        from medicine m ,diagnosis_has_medicine dhm,diagnosis d, reservation r,patient p,user u
+	where m.code= dhm.medicine_code
+	  and dhm.diagnosis_no = d.no
+	    and r.no = d.reservation_no1
+	    and r.patient_no = p.no
+	    and r.user_doctor_no = u.no
+	    and d.no = #{no};
+		]]>
+	</select>
+</mapper>
+	

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="receipt">
+	<select id = "findByDate" parameterType="map" resultType ="receiptDto">
+	<![CDATA[
+	select * from (
+	SELECT @rownum := @rownum +1  AS row_no, a.*
+	FROM   (
+		SELECT         d.no                  as rec_no, 
+               d.status              as rec_status,
+               d.df_price            as rec_price,   # 진단 정보 end
+			   a.remark              as dia_remark, 
+		       a.date                as dia_date, 
+		       a.reservation_no1     as dia_res_no, 
+		       a.user_no             as dia_user_no  # 수납
+		       ,b.diseases_code     as dis_code,
+		       c.diseases_kr       as dis_name       # 질병 정보 end
+		       ,f.prescription_code as pre_code,
+		       g.desc              as pre_desc,
+		       g.desc_detail       as pre_detail,
+               g.price             as pre_price,	# 처방 정보 end
+		       i.no                as pat_no,
+		       i.name              as pat_name, 
+               i.ssn               as pat_ssn,
+               i.phone             as pat_phone      # 환자 정보 end
+		FROM receipt d
+        inner join diagnosis a                  on a.no = d.diagnosis_no
+		inner join diagnosis_has_diseases b     on a.no = b.diagnosis_no
+		inner join diseases c                   on b.diseases_code = c.code # 질병 무조건 들어감
+		inner join diagnosis_has_prescription f on a.no = f.diagnosis_no
+		inner join prescription g               on f.prescription_code = g.code # 처방 무조건 들어감 
+		inner join patient i                    on d.patient_no = i.no
+        where date_format(a.date, '%Y-%m-%d') = if(date_format(#{dia_date}, '%Y-%m-%d')=date_format('9999-12-31', '%Y-%m-%d'), date_format(now(), '%Y-%m-%d'), date_format(#{dia_date}, '%Y-%m-%d'))
+        and   d.status = #{rec_status}
+        and   i.name like #{pat_name}
+        order  by a.date asc
+        ) a, (SELECT @rownum:=0 ) b
+        ) c limit #{nowPage}, 5 
+	]]>
+	</select>
+	
+	<!-- 페이징 데이터 총 개수 구하기 -->
+	<select id = "getCount" parameterType ="map" resultType ="int">
+	<![CDATA[
+			select  count(*)
+			from   receipt as rec
+			inner  join patient as pat on rec.patient_no = pat.no
+			inner  join diagnosis as dia on rec.diagnosis_no = dia.no
+			where  date_format(date, '%Y-%m-%d') = date_format(#{dia_date}, '%Y-%m-%d')
+            and    name like #{name}
+			and    status = #{status} 
+	]]>
+	</select>
+	
+	<!-- 환자 수납전에서 수납완료로 상태 업데이트 -->
+	<update id="update" parameterType="int">
+		<![CDATA[
+			UPDATE receipt
+			SET    status = 2
+			WHERE  no = #{no}
+		]]>
+	</update>
+	
+	<!-- 수납 데이터 추가 -->
+	<insert id="insert" parameterType ="map">
+	<![CDATA[
+		insert into receipt values(null, #{patient_no}, 1, 4000, #{dia_no}, #{doctor_no})
+	]]>
+	</insert>
+	
+</mapper>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="duty">
+	
+
+	<select id="findDutyList" resultType="duty">
+		<![CDATA[
+			select d.no, d.start_date as start_date,d.end_date as end_date, p.no as part_no, p.name as part_name , p.time as part_time, u.no as user_no, u.name as user_name
+			from duty d 
+			inner join part p on d.part_no = p.no
+			right join user u on d.user_no = u.no
+			where status = 'Y'
+			and role = 2 or role = 3
+		]]>		
+	</select>
+	<insert id="insertSeperateDay" parameterType="java.util.Map">
+		<![CDATA[
+			insert into duty values
+		]]>
+		<foreach collection = "dutyList" item="list" separator=",">
+		<![CDATA[
+			(
+				null, 
+				#{list.user_no }, 
+				#{list.start_date },
+				#{list.end_date }, 
+				#{list.part_no } 
+			)
+		]]>
+		</foreach> 
+	</insert>
+	
+	<insert id="insert1" parameterType="duty">
+		<![CDATA[
+			insert into duty values
+			(
+				null, 
+				#{user_no }, 
+				#{list.start_date },
+				#{list.end_date }, 
+				#{part_no } 
+			)
+		]]>
+	</insert>
+	
+		<insert id="insert" parameterType="duty">
+		<![CDATA[
+			insert into duty values
+			(
+				null, 
+				#{user_no }, 
+				#{start_date },
+				#{end_date },
+				#{part_no }
+				
+			)
+		]]>
+	</insert>
+	
+	<update id="update" parameterType="duty">
+		<![CDATA[
+			update duty set start_date = #{start_date} , end_date = #{end_date} where no = #{no};		
+		]]>
+	</update>
+	
+	<delete id="delete" parameterType="duty" > 
+		<![CDATA[
+		delete
+		  from duty 
+		 where no = #{no }
+		 
+		   
+		]]>	
+	</delete>
+	
+	
+	<!-- 오늘 근무자 -->
+	<select id="today" resultType="dutyTodayDto">
+	<![CDATA[
+	 SELECT b.name, a.part_no, a.end_date as date
+		 FROM   duty a
+		 INNER  JOIN user b on a.user_no = b.no
+		 WHERE  date_format(now(), '%Y-%m-%d') <= end_date 
+         AND 	date_format(now(), '%Y-%m-%d') >= start_date 
+		 AND    part_no = 1
+	UNION ALL
+		 SELECT b.name, a.part_no, a.end_date
+		 FROM   duty a
+		 INNER  JOIN user b on a.user_no = b.no
+		 WHERE  date_format(now(), '%Y-%m-%d') <= end_date 
+         AND 	date_format(now(), '%Y-%m-%d') >= start_date 
+		 AND    part_no = 2
+	UNION ALL
+		 SELECT b.name, a.part_no, a.end_date
+		 FROM   duty a
+		 INNER  JOIN user b on a.user_no = b.no
+		 WHERE  date_format(now(), '%Y-%m-%d') <= end_date 
+         AND 	date_format(now(), '%Y-%m-%d') >= start_date 
+		 AND    part_no = 3;
+	]]>		
+</select>
+</mapper>
+	

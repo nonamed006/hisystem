@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<typeAliases>
+		<typeAlias type="com.douzone.hisystem.vo.User" alias="user" />
+		<typeAlias type="com.douzone.hisystem.vo.Board" alias="board" />
+		<typeAlias type="com.douzone.hisystem.vo.Reservation" alias="reservation" />
+		<typeAlias type="com.douzone.hisystem.vo.Patient" alias="patient" />
+		<typeAlias type="com.douzone.hisystem.vo.Duty" alias="duty" />
+		<typeAlias type="com.douzone.hisystem.vo.Receipt" alias="receipt" />
+		<typeAlias type="com.douzone.hisystem.vo.Diagnosis" alias="diagnosis" />
+		<typeAlias type="com.douzone.hisystem.vo.Proof" alias="proof" />
+				<typeAlias type="com.douzone.hisystem.vo.Untact" alias="untact" />
+
+		<typeAlias type="com.douzone.hisystem.vo.ToDoList" alias="todo" />
+		<typeAlias type="com.douzone.hisystem.vo.Medicine" alias="medicine" />
+
+		
+		<typeAlias type="com.douzone.hisystem.dto.ChatRoomDto" alias="chatRoomDto" />
+		<typeAlias type="com.douzone.hisystem.dto.ChatMessageDto" alias="chatMessageDto" />
+		<typeAlias type="com.douzone.hisystem.dto.ReservationDto" alias="reservationDto" />
+		<typeAlias type="com.douzone.hisystem.dto.DiagnosisDto" alias="diagnosisDto" />
+		<typeAlias type="com.douzone.hisystem.dto.ReceiptDto" alias="receiptDto" />
+		<typeAlias type="com.douzone.hisystem.dto.DiaInfoDto" alias="diaInfoDto" />
+		<typeAlias type="com.douzone.hisystem.dto.ChatRoomCreateDto" alias="chatRoomCreateDto" />
+		<typeAlias type="com.douzone.hisystem.dto.DutyTodayDto" alias="dutyTodayDto" />
+		
+	</typeAliases>
+	<mappers>
+		<mapper resource="mybatis/mappers/user.xml" />
+		<mapper resource="mybatis/mappers/board.xml" />
+		<mapper resource="mybatis/mappers/reservation.xml" />
+		<mapper resource="mybatis/mappers/patient.xml" />
+		<mapper resource="mybatis/mappers/chat.xml" />
+		<mapper resource="mybatis/mappers/duty.xml" />
+		<mapper resource="mybatis/mappers/diagnosis.xml" />
+		<mapper resource="mybatis/mappers/receipt.xml" />
+		<mapper resource="mybatis/mappers/proof.xml" />
+		<mapper resource="mybatis/mappers/todo.xml" />
+		<mapper resource="mybatis/mappers/untact.xml" />
+		
+	</mappers>
+</configuration>
